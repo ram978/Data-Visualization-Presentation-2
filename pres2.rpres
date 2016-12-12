@@ -1,0 +1,303 @@
+
+========================================================
+<small>
+### COURSE NAME: Heterogeneous Data Visual Analytics
+### Professor Georges Grinstein
+### Umass Lowell, Computer Science Department
+</small>
+# Title: Data Mining Using R
+## Presented by
+## Janakiram Sundaraneedi
+## Date: `r format(Sys.Date(), format="%B %d %Y")`
+
+Contents
+========================================================
+
+- Data Merging
+- Understanding Data Basics for Visualization
+- Plots
+- Case study:Using Stents to prevent strokes
+- How to Plot in Spatial Visualization
+
+========================================================
+What is Data Merging?
+
+Data Merging:
+========================================================
+- cbind
+- rbind
+- Outer join
+- Left outer
+- Right outer
+- Cross join
+
+
+For Example:
+========================================================
+
+```{r, echo=TRUE}
+data_source1 = data.frame(StudentID = c(1007:1016), Game = sample(c('FootBall','IceHockey', 'Basketball'), 10, replace = TRUE))
+
+data_source2 = data.frame(Minor_Injuries = sample(c('Yes', 'No'), 10, replace = TRUE))
+
+data_source3 = data.frame(StudentID = c(3018:3022), Game = sample(c('Boxing','FieldHockey', 'WaterPool'), 5, replace = TRUE))
+
+data_source4 = data.frame(StudentID = c(1011:1014), Major = sample(c('Computer Science', 'Computer Engineering', 'BioMedical'), 4, replace = TRUE)) 
+```
+
+For Example:
+========================================================
+-Checking Column names Each dataset
+```{r, echo=FALSE}
+names(data_source1)      #data_source1
+names(data_source2)      #data_source2
+names(data_source3)      #data_source3
+names(data_source4)      #data_source4
+```
+
+========================================================
+-Dimensions of each dataset
+```{r, echo=FALSE}
+dim(data_source1)     #data_source1
+dim(data_source2)     #data_source2
+dim(data_source3)     #data_source3
+dim(data_source4)     #data_source4
+```
+
+========================================================
+-str of each dataset
+```{r, echo=FALSE}
+str(data_source1)
+str(data_source2)
+str(data_source3)
+str(data_source3)
+```
+Cbind
+========================================================
+-What is cbind Merging?
+```{r, echo=TRUE}
+cbind(data_source1, data_source2)
+```
+
+Rbind
+========================================================
+-What is Rbind Merging?
+```{r, echo=TRUE}
+rbind(data_source1, data_source3)
+```
+
+Full summary:
+========================================================
+![alt text](join-venn.png)
+
+
+Inner Join
+========================================================
+-What is Inner Join?
+```{r, echo=TRUE}
+merge(x = data_source1, y = data_source4, by = "StudentID", all = TRUE)
+```
+
+Left outer
+========================================================
+-What is Left outer?
+```{r, echo=TRUE}
+merge(x = data_source1, y = data_source4, by = "StudentID", all.x = TRUE)
+
+```
+
+Right Join
+========================================================
+-What is Right Join?
+```{r, echo=TRUE}
+merge(x = data_source1, y = data_source4, by = "StudentID", all.y = TRUE)
+```
+
+Outer Join
+========================================================
+-What is Outer Join?
+```{r, echo=TRUE}
+merge(x = data_source1, y = data_source4, by = NULL)
+```
+
+Data Basics for Visulization
+========================================================
+ - Continous
+ - Discrete
+ - Nominal
+ - Ordinal
+ 
+========================================================
+
+```{r, echo=TRUE}
+install.packages("dplyr",repos = "http://cran.us.r-project.org")
+library(ggplot2)
+tail(InsectSprays)
+```
+
+========================================================
+```{r, echo=FALSE}
+ggplot(InsectSprays, aes(x = count, fill = spray)) + geom_bar()
+```
+
+========================================================
+```{r, echo=FALSE}
+ggplot(InsectSprays, aes(x = count)) + geom_density()
+```
+
+Case study:Using Stents to prevent strokes
+========================================================
+
+General Process of Investigation
+========================================================
+
+- Indentify the question or problem
+- Collect the relevant data on the topic
+- Analyze the data
+- Form a conclusion
+
+Investigate study:
+========================================================
+
+- Evaluating the efficacy of medical treatment
+- How statistics play important role in forming the conclusion
+- Get sense on role statistics can play in practice
+
+What are stents?
+========================================================
+
+Stents are devices put inside blood vessels that assist
+in patient recovery after cardiac and reduce the risk of 
+an additional heart attack or death.
+
+https://www.youtube.com/watch?v=t-zCBKRg7Cs
+
+Indentify the question or problem:
+========================================================
+- Does the stents reduce the risk of stroke.
+
+Data from 451 patients:
+========================================================
+- Treatment Group: Received a stent and medical management.
+- Control Group: Same medial management as treatment.
+
+Read the files.
+========================================================
+
+```{r}
+getwd()
+setwd("/Users/janakiramsundaraneedi/Desktop/dataVis")
+stent30 = read.table("stent30.txt", sep="\t", fill=FALSE, strip.white=TRUE)
+stent30=stent30[-1,]
+colnames(stent30)<-c("Group1","days30")
+stent365 = read.table("stent365.txt", sep="\t", fill=FALSE, strip.white=TRUE)
+stent365=stent365[-1,]
+colnames(stent365)<-c("Group1","days365")
+```
+
+View on Raw Data stent30.
+========================================================
+```{r}
+dim(stent30)
+head(stent30)
+```
+
+View on Raw Data stent365.
+========================================================
+```{r}
+dim(stent365)
+tail(stent365)
+```
+
+View on Raw Data stent365.
+========================================================
+```{r}
+dim(stent365)
+tail(stent365)
+```
+
+Data Filtering using Sqlpackage:
+========================================================
+```{r}
+install.packages("sqldf", repos = "http://cran.us.r-project.org")
+library(sqldf)
+```
+
+Summary for 30 days:Treatment and Control with stroke.
+========================================================
+```{r}
+ts_30<-sqldf("select count() as treatment_stroke_30 from stent30 where days30='stroke' and Group1='treatment'")
+print(ts_30)
+cs_30<-sqldf("select count() as control_stroke_30 from stent30 where days30='stroke' and Group1='control'")
+print(cs_30)
+```
+
+Summary for 30 days:Treatment and Control with no stroke.
+========================================================
+```{r}
+tne_30<-sqldf("select count() as treatment_stroke_no from stent30 where days30='no event' and Group1='treatment'")
+print(tne_30)
+cne_30<-sqldf("select count() as control_stroke_no from stent30 where days30='no event' and Group1='control'")
+print(cne_30)
+```
+Summary for 365 days:Treatment and Control with stroke.
+========================================================
+```{r}
+ts_365<-sqldf("select count() as treatment_stroke_365 from stent365 where days365='stroke' and Group1='treatment'")
+print(ts_365)
+cs_365<-sqldf("select count() as control_stroke_365 from stent365 where days365='stroke' and Group1='control'")
+print(cs_365)
+```
+
+Summary for 365 days:Treatment and Control with no stroke.
+========================================================
+```{r}
+tne_no_365<-sqldf("select count() as treatment_stroke_no from stent365 where days365='no event' and Group1='treatment'")
+print(tne_no_365)
+cne_no_365<-sqldf("select count() as control_stroke_no from stent365 where days365='no event' and Group1='control'")
+print(cne_no_365)
+```
+
+Full summary:
+========================================================
+![alt text](sum.png)
+
+
+========================================================
+```{r}
+total_num_treat<-sqldf("select count() as total_Num_treat from stent365 where Group1='treatment'")
+print(total_num_treat)
+total_num_control<-sqldf("select count() as total_Num_control from stent365 where Group1='control'")
+print(total_num_control)
+```
+
+========================================================
+- Proportion who had a stroke in the treatment (stent) group:
+```{r}
+print(floor(((ts_365)/total_num_treat)*100))
+```
+
+========================================================
+- Proportion who had a stroke in the control group:
+```{r}
+print(floor(((cs_365)/total_num_control)*100))
+```
+
+Conclusion:
+========================================================
+- Treatment group got stroke:20%
+- Control group got stroke:12%
+- It is contrary what doctors expected
+- leads to statistical question, shows real difference in the groups
+
+How to Plot in Spatial Visualization
+========================================================
+- http://rpubs.com/janakiram/leaflet
+
+
+
+References:
+========================================================
+- OpenIntro Statistics
+- DataMining Using R
+- Packages Used: ggplot, Leaflet
